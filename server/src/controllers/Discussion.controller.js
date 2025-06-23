@@ -4,7 +4,10 @@ const { formatResponse } = require("../utils/formatResponse");
 class DiscussionController {
   static async getAllDiscussions(req, res) {
     try {
-      const discussions = await DiscussionService.getAllDiscussions();
+      const user = res.locals.user;
+      const discussions = await DiscussionService.getAllDiscussions(
+        user ? user.id : null
+      );
       res.status(200).json(
         formatResponse({
           statusCode: 200,
@@ -197,13 +200,13 @@ class DiscussionController {
   static async likeDiscussion(req, res) {
     try {
       const { id } = req.params;
-      const discussion = await DiscussionService.likeDiscussion(id);
-
+      const { user } = res.locals;
+      const result = await DiscussionService.toggleLike(id, user.id);
       res.status(200).json(
         formatResponse({
           statusCode: 200,
-          message: "Лайк успешно добавлен",
-          data: discussion,
+          message: result.liked ? "Лайк поставлен" : "Лайк снят",
+          data: result,
         })
       );
     } catch (error) {
@@ -211,7 +214,7 @@ class DiscussionController {
       res.status(500).json(
         formatResponse({
           statusCode: 500,
-          message: "Не удалось добавить лайк",
+          message: "Не удалось изменить лайк",
           error: error.message,
         })
       );

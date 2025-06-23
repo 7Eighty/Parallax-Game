@@ -395,3 +395,64 @@
     gap: 10px;
   }
 }
+
+.edit-discussion-form {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.edit-discussion-form h3 {
+  color: #e7e7e0;
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e7e7e0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.discussion-actions-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.edit-btn {
+  background: rgba(157, 130, 43, 0.2);
+  color: #9d822b;
+  border: 1px solid rgba(157, 130, 43, 0.3);
+  padding: 5px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.edit-btn:hover {
+  background: rgba(157, 130, 43, 0.3);
+}

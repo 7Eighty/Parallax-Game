@@ -77,7 +77,7 @@ const ParallaxHero = () => {
               сообществу игроков и станьте частью легенды.
             </p>
           </div>
-          <div className="copy">© Elbrus Bootcamp Game Studio</div>
+          <div className="copy">© The Overthrow Game Studio</div>
         </article>
       </div>
     </div>

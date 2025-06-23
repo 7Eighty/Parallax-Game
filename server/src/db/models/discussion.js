@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "discussion_id",
         as: "comments",
       });
+      Discussion.hasMany(models.Like, {
+        foreignKey: "discussion_id",
+        as: "likes",
+      });
     }
   }
   Discussion.init(
@@ -42,13 +46,6 @@ module.exports = (sequelize, DataTypes) => {
         references: {
           model: "Users",
           key: "id",
-        },
-      },
-      likes: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-        validate: {
-          min: 0,
         },
       },
       image: {

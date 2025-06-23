@@ -16,13 +16,14 @@ export const DiscussionProvider = ({ children }) => {
   const [discussions, setDiscussions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userLikes, setUserLikes] = useState(new Set()); // Отслеживаем лайки пользователя
   const { user } = useAuth();
 
-  // Загружаем обсуждения при монтировании компонента
+  // Загружаем обсуждения только после того, как user определён (и accessToken установлен)
   useEffect(() => {
-    loadDiscussions();
-  }, []);
+    if (user !== undefined) {
+      loadDiscussions();
+    }
+  }, [user]);
 
   const loadDiscussions = async () => {
     setLoading(true);
@@ -101,77 +102,32 @@ export const DiscussionProvider = ({ children }) => {
       setError("Необходимо войти в систему для постановки лайка");
       return false;
     }
-
+    setLoading(true);
     try {
-      // Проверяем, есть ли уже лайк от пользователя
-      const hasLiked = userLikes.has(id);
-
-      if (hasLiked) {
-        // Если лайк уже есть, убираем его
-        setUserLikes((prev) => {
-          const newLikes = new Set(prev);
-          newLikes.delete(id);
-          return newLikes;
-        });
-
-        // Обновляем количество лайков в обсуждении
+      const response = await CommunityApi.likeDiscussion(id);
+      if (response.statusCode === 200 && response.data) {
         setDiscussions((prev) =>
           prev.map((discussion) =>
             discussion.id === id
-              ? { ...discussion, likes: Math.max(0, discussion.likes - 1) }
+              ? {
+                  ...discussion,
+                  likes: response.data.likes,
+                  liked: response.data.liked,
+                }
               : discussion
           )
         );
+        return true;
       } else {
-        // Если лайка нет, добавляем его
-        setUserLikes((prev) => new Set(prev).add(id));
-
-        // Обновляем количество лайков в обсуждении
-        setDiscussions((prev) =>
-          prev.map((discussion) =>
-            discussion.id === id
-              ? { ...discussion, likes: discussion.likes + 1 }
-              : discussion
-          )
-        );
+        setError(response.message || "Ошибка при изменении лайка");
+        return false;
       }
-
-      // Отправляем запрос на сервер (опционально, для синхронизации)
-      try {
-        await CommunityApi.likeDiscussion(id);
-      } catch (serverError) {
-        console.error("Server sync error:", serverError);
-        // Если сервер недоступен, откатываем изменения
-        if (hasLiked) {
-          setUserLikes((prev) => new Set(prev).add(id));
-          setDiscussions((prev) =>
-            prev.map((discussion) =>
-              discussion.id === id
-                ? { ...discussion, likes: discussion.likes + 1 }
-                : discussion
-            )
-          );
-        } else {
-          setUserLikes((prev) => {
-            const newLikes = new Set(prev);
-            newLikes.delete(id);
-            return newLikes;
-          });
-          setDiscussions((prev) =>
-            prev.map((discussion) =>
-              discussion.id === id
-                ? { ...discussion, likes: Math.max(0, discussion.likes - 1) }
-                : discussion
-            )
-          );
-        }
-      }
-
-      return true;
     } catch (err) {
       console.error("Error toggling like:", err);
       setError("Не удалось изменить лайк");
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -200,9 +156,10 @@ export const DiscussionProvider = ({ children }) => {
     setError(null);
   };
 
-  // Функция для проверки, поставил ли пользователь лайк на обсуждение
+  // Теперь просто возвращаем discussion.liked
   const hasUserLiked = (discussionId) => {
-    return userLikes.has(discussionId);
+    const discussion = discussions.find((d) => d.id === discussionId);
+    return discussion ? !!discussion.liked : false;
   };
 
   const value = {

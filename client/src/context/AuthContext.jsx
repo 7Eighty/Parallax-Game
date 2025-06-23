@@ -13,7 +13,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(undefined);
   const [loading, setLoading] = useState(false);
 
   const login = async (email, password) => {
@@ -81,10 +81,11 @@ export const AuthProvider = ({ children }) => {
   React.useEffect(() => {
     const savedUser = localStorage.getItem("user");
     const savedToken = localStorage.getItem("accessToken");
-
     if (savedUser && savedToken) {
       setUser(JSON.parse(savedUser));
       setAccessToken(savedToken);
+    } else {
+      setUser(null);
     }
   }, []);
 

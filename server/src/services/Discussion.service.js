@@ -1,7 +1,7 @@
-const { Discussion, User, Comment } = require("../db/models");
+const { Discussion, User, Comment, Like } = require("../db/models");
 
 class DiscussionService {
-  static async getAllDiscussions() {
+  static async getAllDiscussions(userId = null) {
     try {
       const discussions = await Discussion.findAll({
         include: [
@@ -22,10 +22,33 @@ class DiscussionService {
             ],
             order: [["createdAt", "ASC"]],
           },
+          {
+            model: Like,
+            as: "likes",
+            attributes: ["user_id"],
+          },
         ],
         order: [["createdAt", "DESC"]],
       });
-      return discussions;
+      // enrich with likes count and liked
+      // ЛОГИРУЕМ userId и лайки для каждого обсуждения
+      discussions.forEach((discussion) => {
+        console.log(
+          `discussion.id=${discussion.id}, userId=${userId}, likes=`,
+          discussion.likes ? discussion.likes.map((l) => l.user_id) : []
+        );
+      });
+      return discussions.map((discussion) => {
+        const likes = discussion.likes ? discussion.likes.length : 0;
+        const liked = userId
+          ? discussion.likes.some((like) => like.user_id === userId)
+          : false;
+        return {
+          ...discussion.toJSON(),
+          likes,
+          liked,
+        };
+      });
     } catch (error) {
       console.error("DiscussionService getAllDiscussions error:", error);
       throw new Error("Ошибка при получении обсуждений");
@@ -106,7 +129,6 @@ class DiscussionService {
       if (!discussion) {
         throw new Error("Обсуждение не найдено");
       }
-      await discussion.increment("likes");
       return await this.getDiscussionById(id);
     } catch (error) {
       console.error("DiscussionService likeDiscussion error:", error);
@@ -129,6 +151,29 @@ class DiscussionService {
       console.error("DiscussionService addComment error:", error);
       throw new Error("Ошибка при добавлении комментария");
     }
+  }
+
+  static async toggleLike(discussionId, userId) {
+    const discussion = await Discussion.findByPk(discussionId);
+    if (!discussion) {
+      throw new Error("Обсуждение не найдено");
+    }
+    const existingLike = await Like.findOne({
+      where: { discussion_id: discussionId, user_id: userId },
+    });
+    let liked;
+    if (existingLike) {
+      await existingLike.destroy();
+      liked = false;
+    } else {
+      await Like.create({ discussion_id: discussionId, user_id: userId });
+      liked = true;
+    }
+    // Считаем количество лайков
+    const likesCount = await Like.count({
+      where: { discussion_id: discussionId },
+    });
+    return { likes: likesCount, liked };
   }
 }
 
