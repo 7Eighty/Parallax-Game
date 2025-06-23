@@ -1,0 +1,79 @@
+@font-face {
+  font-family: raleway_f;
+  src: url(./fonts/raleway-regular.woff2);
+}
+
+@font-face {
+  font-family: raleway_f;
+  src: url(./fonts/raleway-black.woff2);
+  font-weight: 900;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #010101;
+  font-family: raleway_f, sans-serif;
+  line-height: 1.55;
+  color: #e7e7e0;
+}
+
+.App {
+  min-height: 100vh;
+}
+
+/* Глобальные стили для кнопок */
+button {
+  font-family: raleway_f, sans-serif;
+}
+
+/* Глобальные стили для ссылок */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Глобальные стили для скроллбара */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(157, 130, 43, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(157, 130, 43, 0.7);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+}
